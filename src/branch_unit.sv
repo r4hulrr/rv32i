@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 module branch_unit(
 	input logic i_branch,
 	input logic [2 : 0] i_branch_op,
