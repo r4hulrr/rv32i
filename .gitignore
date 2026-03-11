@@ -1,0 +1,15 @@
+# Vivado / XSIM generated files
+xsim.dir/
+.Xil/
+*.jou
+*.log
+*.pb
+*.backup.*
+
+# temporary build outputs
+*.wdb
+*.str
+*.vcd
+
+# OS junk
+.DS_Store

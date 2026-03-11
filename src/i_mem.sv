@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module instruction_mem #(
 	parameter MEM_SIZE = 1024
 )(
