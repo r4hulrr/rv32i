@@ -1,8 +1,10 @@
+`timescale 1ns/1ps
+
 module alu(
 	input logic[31 : 0] i_a,
 	input logic[31 : 0] i_b,
 	
-	input logic[5 : 0] alu_op,
+	input logic[5 : 0] i_alu_op,
 
 	output logic [31 : 0] o_alu
 );
@@ -20,7 +22,7 @@ module alu(
 	localparam logic [5:0] OP_ALU_SRA  = 6'b101011;
 
 	always_comb begin
-		case(alu_op)
+		case(i_alu_op)
 			OP_ALU_ADD : o_alu = i_a + i_b;
 			OP_ALU_SUB : o_alu = i_a - i_b;
 			OP_ALU_AND : o_alu = i_a & i_b;
