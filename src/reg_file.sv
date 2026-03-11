@@ -23,7 +23,7 @@ module reg_file #(
 
 	always_ff @(posedge i_clk) begin
 		if (i_rst) begin
-			:for (int i = 0; i < NUM_REG; i++) begin
+			for (int i = 0; i < NUM_REG; i++) begin
                 		reg_mem[i] <= '0;
 			end
         	end else if (i_we && i_wr_addr != 0) begin  // x0 hardwired to 0
