@@ -16,13 +16,6 @@ module instruction_mem #(
 		$readmemh("tests.hex", mem);
 	end
 
-	always_ff @(posedge i_clk) begin
-		if(i_rst) begin
-			o_ins <= '0;
-		end else begin
-			// word aligned
-			o_ins <= mem[i_addr >> 2];
-		end
-	end
+	assign o_ins = mem[i_addr >> 2];
 
 endmodule
