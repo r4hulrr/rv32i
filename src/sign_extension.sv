@@ -1,8 +1,9 @@
+`timescale 1ns/1ps
 module sign_extension(
 	input logic [31 : 0] i_inst,
 	input logic [6 : 0] i_op,
 	
-	output logic [31 : 0] o_inst
+	output logic [31 : 0] o_imm
 );
 
 	localparam logic [7 : 0] OP_LUI     = 7'b0110111; // Load Upper Immediate
