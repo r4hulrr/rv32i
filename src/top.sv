@@ -9,9 +9,10 @@ module top (
 
 	// PC
 	logic [31:0] pc;
-	logic [31:0] pc_plus4;
+	logic [31:0] next_pc;
 	logic        take;
 	logic [31:0] alu_out;      // branch target (or any ALU result)
+	logic [31:0] pc_plus4;
 
 	assign pc_plus4 = pc + 4;
 
@@ -19,15 +20,20 @@ module top (
 		if (i_rst)
 			pc <= '0;
 		else
-			pc <= take ? alu_out : pc_plus4;
+			pc <= next_pc;
+	end
+
+	always_comb begin
+		if (take)
+        		next_pc = {alu_out[31:2], 2'b00};
+    		else
+        	next_pc = pc + 32'd4;
 	end
 
 	// Instruction memory
 	logic [31:0] inst;
 
 	instruction_mem imem (
-		.i_clk  (i_clk),
-		.i_rst  (i_rst),
 		.i_addr (pc),
 		.o_ins  (inst)
 	);

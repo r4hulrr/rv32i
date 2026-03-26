@@ -135,12 +135,12 @@ module control_unit (
 			OP_ALU: begin
 				o_reg_write = 1'b1;
 				case (funct3)
-					3'b000: o_alu_op = funct7[5] ? OP_ALU_SUB : OP_ALU_ADD;
+					3'b000: o_alu_op = (funct7 == 7'b0100000) ? OP_ALU_SUB : OP_ALU_ADD;
 					3'b001: o_alu_op = OP_ALU_SLL;
 					3'b010: o_alu_op = OP_ALU_SLT;
 					3'b011: o_alu_op = OP_ALU_SLTU;
 					3'b100: o_alu_op = OP_ALU_XOR;
-					3'b101: o_alu_op = funct7[5] ? OP_ALU_SRA : OP_ALU_SRL;
+					3'b101: o_alu_op = (funct7 == 7'b0100000) ? OP_ALU_SRA : OP_ALU_SRL;
 					3'b110: o_alu_op = OP_ALU_OR;
 					3'b111: o_alu_op = OP_ALU_AND;
 					default: o_alu_op = OP_ALU_NOP;
@@ -156,7 +156,7 @@ module control_unit (
 					3'b010: o_alu_op = OP_ALU_SLT;
 					3'b011: o_alu_op = OP_ALU_SLTU;
 					3'b100: o_alu_op = OP_ALU_XOR;
-					3'b101: o_alu_op = funct7[5] ? OP_ALU_SRA : OP_ALU_SRL;
+					3'b101: o_alu_op = (funct7 == 7'b0100000) ? OP_ALU_SRA : OP_ALU_SRL;
 					3'b110: o_alu_op = OP_ALU_OR;
 					3'b111: o_alu_op = OP_ALU_AND;
 					default: o_alu_op = OP_ALU_NOP;

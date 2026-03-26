@@ -20,6 +20,9 @@ module alu(
 	localparam logic [5:0] OP_ALU_SLL  = 6'b100111;
 	localparam logic [5:0] OP_ALU_SRL  = 6'b101001;
 	localparam logic [5:0] OP_ALU_SRA  = 6'b101011;
+	
+	logic signed [31:0] i_a_signed;
+	assign i_a_signed = i_a;
 
 	always_comb begin
 		case(i_alu_op)
@@ -30,7 +33,7 @@ module alu(
 			OP_ALU_XOR : o_alu = i_a ^ i_b;
 			OP_ALU_SLL : o_alu = i_a << i_b[4 : 0];
 			OP_ALU_SRL : o_alu = i_a >> i_b[4 : 0];
-			OP_ALU_SRA : o_alu = i_a >>> i_b[4 : 0];
+			OP_ALU_SRA  : o_alu = i_a_signed >>> i_b[4:0];
 			OP_ALU_SLT  : o_alu = ($signed(i_a) < $signed(i_b)) ? 32'd1 : 32'd0;
             		OP_ALU_SLTU : o_alu = (i_a < i_b)                   ? 32'd1 : 32'd0;
 			default : o_alu = '0;
