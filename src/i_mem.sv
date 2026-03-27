@@ -3,7 +3,7 @@
 module instruction_mem #(
 	parameter MEM_SIZE = 1024
 )(
-	input logic [$clog2(MEM_SIZE) - 1:0] i_addr,
+	input logic [31:0] i_addr,
 
 	output logic [31 : 0] o_ins
 );

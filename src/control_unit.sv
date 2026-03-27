@@ -17,7 +17,8 @@ module control_unit (
 	output logic        o_alu_src_b,  // 0=reg, 1=imm
 	output logic [1:0]  o_result_mux, // 00=alu, 01=pc+4, 10=mem
 	output logic [2:0]  o_branch_op,
-	output logic [5:0]  o_alu_op
+	output logic [5:0]  o_alu_op,
+	output logic [2:0]  o_mem_width   // funct3 passed to mem (for LB/LH/LW/LBU/LHU/SB/SH/SW)
 );
 	// opcodes
 	localparam logic [6:0] OP_LUI    = 7'b0110111;
@@ -76,9 +77,10 @@ module control_unit (
 		o_branch_op  = BRANCH_BEQ;
 		o_alu_op     = OP_ALU_ADD;
 		o_rs1_addr   = i_inst[19:15];
+		o_mem_width  = funct3;
 
 		case (opcode)
-			
+
 			OP_LUI: begin
 				o_reg_write = 1'b1;
 				o_alu_src_b = 1'b1;
@@ -109,7 +111,9 @@ module control_unit (
 			end
 
 			OP_BRANCH: begin
-				o_branch = 1'b1;         // rs1 vs rs2
+				o_branch    = 1'b1;
+				o_alu_src_a = 1'b1;      // PC + imm for branch target
+				o_alu_src_b = 1'b1;
 				case (funct3)
 					BRANCH_BEQ  : o_branch_op = BRANCH_BEQ;
 					BRANCH_BNE  : o_branch_op = BRANCH_BNE;
@@ -154,7 +158,7 @@ module control_unit (
 					3'b000: o_alu_op = OP_ALU_ADD;
 					3'b001: o_alu_op = OP_ALU_SLL;
 					3'b010: o_alu_op = OP_ALU_SLT;
-					3'b011: o_alu_op = OP_ALU_SLTU;
+					3'b011: o_alu_op = OP_ALU_SLTU;  // SLTIU
 					3'b100: o_alu_op = OP_ALU_XOR;
 					3'b101: o_alu_op = (funct7 == 7'b0100000) ? OP_ALU_SRA : OP_ALU_SRL;
 					3'b110: o_alu_op = OP_ALU_OR;

@@ -22,34 +22,40 @@ module top_tb;
 
 	task automatic init_expected();
 		for (int i = 0; i < 32; i++) expected[i] = 32'hX;
+		// ── Phase 1: ALU / immediate / memory / jump ──
 		expected[0]  = 32'h00000000;  // x0  hardwired zero
-		expected[1]  = 32'h00000005;  // ADDI  x1=5
-		expected[2]  = 32'h0000000A;  // ADDI  x2=10
-		expected[3]  = 32'h00000002;  // ADDI  x3=2 (shift amount)
-		expected[4]  = 32'h0000000A;  // SLLI  x4=x1<<1=10
-		expected[5]  = 32'h00000001;  // SLTI  x5=(5<10)=1
-		expected[6]  = 32'h00000003;  // XORI  x6=0^3=3
-		expected[7]  = 32'h0000000E;  // ORI   x7=0|14=14
-		expected[8]  = 32'h0000000A;  // ANDI  x8=10&15=10
-		expected[9]  = 32'h00000005;  // SRLI  x9=10>>1=5
-		expected[10] = 32'h00000002;  // SRAI  x10=5>>>1=2
-		expected[11] = 32'h0000000F;  // ADD   x11=5+10=15
-		expected[12] = 32'hFFFFFFFB;  // SUB   x12=5-10=-5
-		expected[13] = 32'h00000000;  // AND   x13=5&10=0
-		expected[14] = 32'h0000000F;  // OR    x14=5|10=15
-		expected[15] = 32'h0000000F;  // XOR   x15=5^10=15
-		expected[16] = 32'h00000014;  // SLL   x16=5<<2=20
-		expected[17] = 32'h00000002;  // SRL   x17=10>>2=2
-		expected[18] = 32'hFFFFFFFE;  // SRA   x18=-5>>>2=-2
-		expected[19] = 32'h00000001;  // SLT   x19=(5<10)=1
-		expected[20] = 32'h00000000;  // SLT   x20=(10<5)=0
-		expected[21] = 32'h00000001;  // SLTU  x21=(5<10)u=1
-		expected[22] = 32'h00001000;  // LUI   x22=0x1000
-		expected[23] = 32'h00000058;  // AUIPC x23=PC=0x58
-		expected[24] = 32'h00000005;  // LW    x24=mem[x22]=5
-		expected[25] = 32'h00000068;  // JAL   x25=PC+4=0x68
-		expected[26] = 32'h0000007C;  // ADDI  x26=jalr target=0x7C
-		expected[27] = 32'h00000078;  // JALR  x27=PC+4=0x78
+		expected[1]  = 32'h00000005;  // ADDI   x1  = 5
+		expected[2]  = 32'h0000000A;  // ADDI   x2  = 10
+		expected[3]  = 32'h00000002;  // ADDI   x3  = 2
+		expected[4]  = 32'h0000000A;  // SLLI   x4  = 5<<1  = 10
+		expected[5]  = 32'h00000001;  // SLTI   x5  = (5<10)= 1
+		expected[6]  = 32'h00000003;  // XORI   x6  = 0^3   = 3
+		expected[7]  = 32'h0000000E;  // ORI    x7  = 0|14  = 14
+		expected[8]  = 32'h0000000A;  // ANDI   x8  = 10&15 = 10
+		expected[9]  = 32'h00000005;  // SRLI   x9  = 10>>1 = 5
+		expected[10] = 32'h00000002;  // SRAI   x10 = 5>>>1 = 2
+		expected[11] = 32'h0000000F;  // ADD    x11 = 5+10  = 15
+		expected[12] = 32'hFFFFFFFB;  // SUB    x12 = 5-10  = -5
+		expected[13] = 32'h00000000;  // AND    x13 = 5&10  = 0
+		expected[14] = 32'h0000000F;  // OR     x14 = 5|10  = 15
+		expected[15] = 32'h0000000F;  // XOR    x15 = 5^10  = 15
+		expected[16] = 32'h00000014;  // SLL    x16 = 5<<2  = 20
+		expected[17] = 32'h00000002;  // SRL    x17 = 10>>2 = 2
+		expected[18] = 32'hFFFFFFFE;  // SRA    x18 = -5>>>2= -2
+		expected[19] = 32'h00000001;  // SLT    x19 = (5<10)= 1
+		expected[20] = 32'h00000000;  // SLT    x20 = (10<5)= 0
+		expected[21] = 32'h00000001;  // SLTU   x21 = (5<10u)=1
+		expected[22] = 32'h00001000;  // LUI    x22 = 0x1000
+		expected[23] = 32'h00000058;  // AUIPC  x23 = PC=0x58
+		expected[24] = 32'h00000005;  // LW     x24 = mem[0x1000]=5
+		expected[25] = 32'h00000068;  // JAL    x25 = PC+4=0x68
+		expected[26] = 32'h0000007C;  // ADDI   x26 = 0x7C
+		expected[27] = 32'h00000078;  // JALR   x27 = PC+4=0x78
+		// ── Phase 2: SLTIU / branches / byte+half mem ──
+		expected[28] = 32'h00000001;  // SLTIU  x28 = (5<10u)=1
+		expected[29] = 32'h00000006;  // BEQ/BNE/BLT/BGE/BLTU/BGEU all taken → 6
+		expected[30] = 32'hFFFFFFFF;  // LB     x30 = sign-extend(0xFF) = -1
+		expected[31] = 32'hFFFF8000;  // LH     x31 = sign-extend(0x8000)
 	endtask
 
 	function automatic string decode(input logic [31:0] inst);
@@ -71,7 +77,15 @@ module top_tb;
 				3'b110: return "OR";    3'b111: return "AND";
 				default: return "ALU-R";
 			endcase
-			7'h03: return "LW";     7'h23: return "SW";
+			7'h03: case(f3)
+				3'b000: return "LB";    3'b001: return "LH";
+				3'b010: return "LW";    3'b100: return "LBU";
+				3'b101: return "LHU";   default: return "LOAD";
+			endcase
+			7'h23: case(f3)
+				3'b000: return "SB";    3'b001: return "SH";
+				3'b010: return "SW";    default: return "STORE";
+			endcase
 			7'h6F: return "JAL";    7'h67: return "JALR";
 			7'h37: return "LUI";    7'h17: return "AUIPC";
 			7'h63: case(f3)
@@ -105,10 +119,10 @@ module top_tb;
 		if (fail_count == 0)
 			$display("  ALL CHECKS PASSED\n");
 		else
-			$display("  SOME CHECKS FAILED — see above\n");
+			$display("  SOME CHECKS FAILED - see above\n");
 	endtask
 
-	int   cycle_count;
+	int cycle_count;
 
 	initial begin
 		init_expected();

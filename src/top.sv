@@ -10,9 +10,9 @@ module top (
 	// PC
 	logic [31:0] pc;
 	logic [31:0] next_pc;
-	logic        take;
-	logic [31:0] alu_out;      // branch target (or any ALU result)
 	logic [31:0] pc_plus4;
+	logic        take;
+	logic [31:0] alu_out;
 
 	assign pc_plus4 = pc + 4;
 
@@ -25,9 +25,9 @@ module top (
 
 	always_comb begin
 		if (take)
-        		next_pc = {alu_out[31:2], 2'b00};
-    		else
-        	next_pc = pc + 32'd4;
+			next_pc = {alu_out[31:1], 1'b0};
+		else
+			next_pc = pc + 32'd4;
 	end
 
 	// Instruction memory
@@ -46,6 +46,7 @@ module top (
 	logic [1:0] result_mux;
 	logic [2:0] branch_op;
 	logic [5:0] alu_op;
+	logic [2:0] mem_width;
 
 	control_unit ctrl (
 		.i_inst      (inst),
@@ -60,7 +61,8 @@ module top (
 		.o_alu_src_b (alu_src_b),
 		.o_result_mux(result_mux),
 		.o_branch_op (branch_op),
-		.o_alu_op    (alu_op)
+		.o_alu_op    (alu_op),
+		.o_mem_width (mem_width)
 	);
 
 	// Sign extension
@@ -74,7 +76,7 @@ module top (
 
 	// Register file
 	logic [31:0] rs1, rs2;
-	logic [31:0] result;   // writeback value 
+	logic [31:0] result;
 
 	reg_file regs (
 		.i_clk     (i_clk),
@@ -106,12 +108,13 @@ module top (
 	logic [31:0] mem_data;
 
 	data_mem dmem (
-		.i_clk  (i_clk),
-		.i_rst  (i_rst),
-		.i_we   (mem_write),
-		.i_data (rs2),
-		.i_addr (alu_out),
-		.o_data (mem_data)
+		.i_clk   (i_clk),
+		.i_rst   (i_rst),
+		.i_we    (mem_write),
+		.i_width (mem_width),
+		.i_data  (rs2),
+		.i_addr  (alu_out),
+		.o_data  (mem_data)
 	);
 
 	// Writeback mux
